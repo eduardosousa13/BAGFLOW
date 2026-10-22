@@ -1,5 +1,7 @@
 # M1 + M2 — implementação e ligação
 
+Este relatório descreve a entrega original. A composição real com M3, após os PRs #1/#2, está documentada em `docs/REAL_INTEGRATION.md`.
+
 ## Âmbito e ficheiros
 
 - `Assets/Scripts/Probability/DistributionSampler.cs`: `IDistributionSampler`, C# puro.
@@ -82,7 +84,7 @@ Para a futura composição M1/M3/M4, usar um único ponto de composição: prefe
 
 O controlador acumula `Time.unscaledDeltaTime*speed`; `SimulationSession` executa no máximo 1000 ticks/frame por defeito, preservando o saldo. Uma pausa não acumula tempo nem consome RNG. A conclusão suspende stepping. Falhas do motor, relógio estagnado/não finito, overflow e horizonte máximo param a execução e mostram erro, sem apresentar conclusão normal. Cada frame apresenta apenas o último snapshot; a UI recebe progresso/FIFO calculados por M3.
 
-Os campos de motor, views e controlos da cena estão vazios intencionalmente até às entregas de M3/M4. Entrar em Play não inicia uma simulação fictícia. Depois de ligar as dependências, os controlos disparam os eventos definidos no contrato. OnDisable desliga os eventos e pausa; OnEnable volta a ligar sem duplicar subscrições.
+Na cena principal atual, `SimulationComposition` constrói o motor real no Start e liga-o ao controlador. Os componentes M4 devem ser atribuídos nos campos da composição; os campos legados do controlador ficam vazios nessa cena. Entrar em Play não inicia automaticamente uma execução sem os controlos. OnDisable desliga os eventos e pausa; OnEnable volta a ligar sem duplicar subscrições. Ver `docs/REAL_INTEGRATION.md` para as ligações e testes reais.
 
 ## Lacunas de contrato e exportação
 
@@ -113,6 +115,6 @@ Não usar `-quit` com `-runTests`, pois pode terminar antes de completar os test
 
 Os ensaios usam 100000 amostras nas distribuições contínuas principais, 10000 lotes Binomial(60,0.08), 10000 processos Poisson em janelas de 60 s e 10000 amostras na normal condicionada a `[2,3]`. Médias: tolerância de cinco erros padrão `5*sqrt(var/n)`. Variâncias: `5*sqrt((mu4-var²)/n)`; na triangular `mu4=2.4*var²`, na exponencial `mu4=9*var²`, na binomial `mu4=3*var²+var*(1-6p(1-p))`, na Poisson `mu4=3*var²+var`. Para truncadas, usa-se o majorante rigoroso `mu4 <= max(|L-E|,|H-E|)²*var`. São verificações estatísticas determinísticas com seed fixa, não prova empírica de adequação a aeroportos.
 
-Os testes de integração usam apenas um motor de teste: validam pausa, reset, velocidades, backlog, conclusão, configurações inválidas, erro por estagnação/horizonte, eventos UI, cópias de exportação e importação da cena sem scripts em falta. Não substituem os futuros testes operacionais do motor M3 nem a inspeção visual da demo.
+Os testes originais de integração usam um motor de teste: validam pausa, reset, velocidades, backlog, conclusão, configurações inválidas, erro por estagnação/horizonte, eventos UI, cópias de exportação e importação da cena sem scripts em falta. Foram complementados pelos testes M3 e pelos testes reais documentados em `docs/REAL_INTEGRATION.md`; a inspeção visual da demo continua pendente.
 
 A evidência da execução efetiva e as limitações encontram-se em `docs/M1_M2_TEST_RESULTS.md`.

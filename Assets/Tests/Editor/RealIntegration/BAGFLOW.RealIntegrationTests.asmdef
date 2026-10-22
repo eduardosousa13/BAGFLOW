@@ -1,0 +1,7 @@
+{
+  "name": "BAGFLOW.RealIntegrationTests",
+  "rootNamespace": "AirportBaggageSimulator.Tests",
+  "references": ["BAGFLOW.Contracts", "BAGFLOW.Integration", "BAGFLOW.Simulation", "BAGFLOW.Composition"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}
