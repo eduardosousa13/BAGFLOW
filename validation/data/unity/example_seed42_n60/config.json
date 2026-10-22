@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "app": "BAGFLOW",
+  "app_version": "1.0",
+  "exported_utc": "2026-10-22T22:46:59Z",
+  "prng_algorithm": "SplitMix64-open52-v1",
+  "seed": 42,
+  "random_streams": ["Arrival", "Transport", "Weight", "Inspection", "Flagging", "Blockage"],
+  "parameters": {
+    "BaggageCount": 60,
+    "Seed": 42,
+    "ArrivalMode": "Constant",
+    "MeanArrivalIntervalSeconds": 5,
+    "TransportMinSeconds": 6,
+    "TransportModeSeconds": 9,
+    "TransportMaxSeconds": 13,
+    "MeanInspectionSeconds": 8,
+    "WeightBaseMeanKg": 18,
+    "WeightBaseStdKg": 4,
+    "MinWeightKg": 5,
+    "MaxWeightKg": 32,
+    "HeavyWeightThresholdKg": 23,
+    "FlagProbability": 0.08,
+    "BlockageRatePerSecond": 0.0083333333333333332,
+    "BlockageDurationSeconds": 8,
+    "SimulationStepSeconds": 0.1,
+    "PlaybackSpeed": 10,
+    "MaxSimulatedSeconds": 10800
+  },
+  "units": {"time": "s", "weight": "kg", "rate": "1/s", "probability": "[0,1]"},
+  "summary": {"bag_count": 60, "event_count": 436, "completed": 60, "approved": 56, "flagged": 4, "blockage_occurrences": 5, "last_event_time_s": 499.5},
+  "files": {"bags": "bags.csv", "events": "events.csv"}
+}

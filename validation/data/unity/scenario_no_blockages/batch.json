@@ -1,0 +1,31 @@
+{
+  "name": "scenario_no_blockages",
+  "created_utc": "2026-10-22T22:47:22Z",
+  "app_version": "1.0",
+  "prng_algorithm": "SplitMix64-open52-v1",
+  "runs": 300,
+  "first_seed": 300000,
+  "last_seed": 300299,
+  "full_exports": 0,
+  "template": {
+      "BaggageCount": 60,
+      "Seed": 42,
+      "ArrivalMode": "Constant",
+      "MeanArrivalIntervalSeconds": 5,
+      "TransportMinSeconds": 6,
+      "TransportModeSeconds": 9,
+      "TransportMaxSeconds": 13,
+      "MeanInspectionSeconds": 8,
+      "WeightBaseMeanKg": 18,
+      "WeightBaseStdKg": 4,
+      "MinWeightKg": 5,
+      "MaxWeightKg": 32,
+      "HeavyWeightThresholdKg": 23,
+      "FlagProbability": 0.08,
+      "BlockageRatePerSecond": 0,
+      "BlockageDurationSeconds": 8,
+      "SimulationStepSeconds": 0.1,
+      "PlaybackSpeed": 10,
+      "MaxSimulatedSeconds": 10800
+    }
+}
