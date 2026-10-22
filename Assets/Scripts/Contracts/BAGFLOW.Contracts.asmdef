@@ -1,0 +1,5 @@
+{
+  "name": "BAGFLOW.Contracts",
+  "rootNamespace": "AirportBaggageSimulator",
+  "noEngineReferences": true
+}
