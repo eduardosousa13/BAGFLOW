@@ -105,10 +105,14 @@ namespace AirportBaggageSimulator
             Execute(() => { RequireReady(); session.Reset(); if (session.IsInitialized) { world?.ResetView(); Render(); } });
         }
         private void SetPlaybackSpeed(double speed) { Execute(() => { RequireReady(); session.SetPlaybackSpeed(speed); }); }
-        private void Update()
+        private void Update() { Advance(Time.unscaledDeltaTime); }
+
+        /// <summary>Advance one frame through the same path used by Update. The supplied duration
+        /// is real, unscaled seconds; logical ticks and randomness remain inside session/engine.</summary>
+        public void Advance(double realSeconds)
         {
             if (session == null || !session.IsInitialized || !session.IsRunning) return;
-            Execute(() => { session.Advance(Time.unscaledDeltaTime, maxTicksPerFrame); Render(); });
+            Execute(() => { session.Advance(realSeconds, maxTicksPerFrame); Render(); });
         }
         private void Render()
         {
