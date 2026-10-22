@@ -103,28 +103,49 @@ namespace AirportBaggageSimulator
                     if (File.Exists(target.Key))
                         throw new IOException("Export refused: " + target.Key + " already exists. Choose another folder or allow overwrite explicitly.");
 
-            var written = new List<string>();
+            // Stage on the same filesystem and keep originals until ALL files are published.
+            // The private folder also owns partial writes if StreamWriter.Write/Dispose fails.
+            string staging = Path.Combine(directory, ".bagflow-export-" + Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(staging);
+            var published = new List<string>();
+            var backups = new List<KeyValuePair<string, string>>();
             try
             {
                 foreach (var target in targets)
                 {
-                    string temp = target.Key + ".tmp";
+                    string temp = Path.Combine(staging, Path.GetFileName(target.Key));
                     using (var stream = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                     using (var writer = new StreamWriter(stream, Utf8)) writer.Write(target.Value);
-                    written.Add(temp);
                 }
-                for (int i = 0; i < targets.Length; i++)
+                foreach (var target in targets)
                 {
-                    if (options.AllowOverwrite && File.Exists(targets[i].Key)) File.Delete(targets[i].Key);
-                    File.Move(written[i], targets[i].Key);
-                    written[i] = targets[i].Key;
+                    if (options.AllowOverwrite && File.Exists(target.Key))
+                    {
+                        string backup = Path.Combine(staging, Path.GetFileName(target.Key) + ".bak");
+                        File.Move(target.Key, backup);
+                        backups.Add(new KeyValuePair<string, string>(target.Key, backup));
+                    }
+                    File.Move(Path.Combine(staging, Path.GetFileName(target.Key)), target.Key);
+                    published.Add(target.Key);
                 }
             }
-            catch
+            catch (Exception error)
             {
-                foreach (var path in written) TryDelete(path);
+                var failures = new List<Exception> { error };
+                for (int i = published.Count - 1; i >= 0; i--)
+                    try { File.Delete(published[i]); }
+                    catch (Exception recoveryError) { failures.Add(recoveryError); }
+                for (int i = backups.Count - 1; i >= 0; i--)
+                    try { File.Move(backups[i].Value, backups[i].Key); }
+                    catch (Exception recoveryError) { failures.Add(recoveryError); }
+                // Never remove the only surviving copy if filesystem access also prevents rollback.
+                if (failures.Count > 1)
+                    throw new IOException("Export failed and recovery was incomplete. Preserve the recovery folder: " +
+                        Path.GetFullPath(staging), new AggregateException(failures));
+                TryDeleteDirectory(staging);
                 throw;
             }
+            TryDeleteDirectory(staging);
 
             int flagged = 0, occurrences = 0;
             foreach (var bag in bags) if (bag.IsFlagged == true) flagged++;
@@ -278,9 +299,9 @@ namespace AirportBaggageSimulator
             }
         }
 
-        private static void TryDelete(string path)
+        private static void TryDeleteDirectory(string path)
         {
-            try { if (File.Exists(path)) File.Delete(path); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            try { System.IO.Directory.Delete(path, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
         }
 
         private static void TryDeleteEmptyDirectory(string path)

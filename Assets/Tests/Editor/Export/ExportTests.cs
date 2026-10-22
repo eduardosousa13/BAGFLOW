@@ -232,6 +232,48 @@ namespace AirportBaggageSimulator.Tests
             StringAssert.EndsWith("bagflow_20261022_120000_seed1_n5_2", b.Directory);
         }
 
+        [TestCase(1, true)]
+        [TestCase(2, true)]
+        [TestCase(1, false)]
+        [TestCase(2, false)]
+        public void FailedPublicationRestoresOriginalsAndRemovesNewFiles(int collisionIndex, bool overwrite)
+        {
+            var run = RealRun(3, 1);
+            string dir = Path.Combine(root, "rollback");
+            Directory.CreateDirectory(dir);
+            string[] names = { "bags.csv", "events.csv", "config.json" };
+            var originals = new Dictionary<string, byte[]>();
+            for (int i = 0; i < names.Length; i++)
+            {
+                string path = Path.Combine(dir, names[i]);
+                if (i == collisionIndex) Directory.CreateDirectory(path);
+                else if (overwrite)
+                {
+                    byte[] bytes = { 0, 255, (byte)i, 13, 10 };
+                    File.WriteAllBytes(path, bytes);
+                    originals.Add(path, bytes);
+                }
+            }
+            string unrelated = Path.Combine(dir, "keep.txt");
+            File.WriteAllText(unrelated, "unrelated result");
+
+            // A directory at the second/third target fails AFTER earlier files were published.
+            Assert.Throws<IOException>(() => SimulationExporter.ExportToFolder(dir,
+                run.Config, run.Bags, run.Events, Fixed(overwrite)));
+            foreach (var original in originals)
+                CollectionAssert.AreEqual(original.Value, File.ReadAllBytes(original.Key));
+            Assert.AreEqual(originals.Count + 1, Directory.GetFiles(dir).Length);
+            Assert.AreEqual(1, Directory.GetDirectories(dir).Length, "no staging or backup folder left behind");
+            Assert.IsTrue(Directory.Exists(Path.Combine(dir, names[collisionIndex])));
+            Assert.AreEqual("unrelated result", File.ReadAllText(unrelated));
+
+            Directory.Delete(Path.Combine(dir, names[collisionIndex]));
+            SimulationExporter.ExportToFolder(dir, run.Config, run.Bags, run.Events, Fixed(overwrite));
+            Assert.AreEqual(0, Directory.GetDirectories(dir).Length);
+            Assert.AreEqual(4, Directory.GetFiles(dir).Length);
+            Assert.AreEqual(SimulationExporter.BagsCsv(run.Bags), File.ReadAllText(Path.Combine(dir, "bags.csv")));
+        }
+
         [Test] public void IoAndInputErrorsAreReportedWithoutPartialOutput()
         {
             var run = RealRun(3, 5);

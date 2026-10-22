@@ -26,7 +26,7 @@ Cada exportação cria uma pasta **nova** `bagflow_<AAAAMMDD_hhmmss UTC>_seed<S>
 
 Convenções: UTF-8 sem BOM, separador `,`, fim de linha `\n`, ponto decimal (InvariantCulture, independente do idioma do sistema), números em representação *round-trip* (amostras brutas sem arredondamento), aspas RFC 4180 nos campos de texto, **campo vazio = valor inexistente** (mala não inspecionada/não concluída), `flagged` = `1`/`0`/vazio, `NaN`/`Inf` recusados. `queue_wait_s = scan_start − queue_enter` e `total_s = complete − arrival` são derivados (nunca sorteados). `scheduled_time_s` de `BlockageOccurrence` é o instante matemático da ocorrência Poisson.
 
-Proteções: nada é escrito se a formatação falhar; ficheiros escritos como `.tmp` e renomeados; uma pasta com `bags.csv/events.csv/config.json` existentes nunca é substituída sem `AllowOverwrite`; ficheiros parciais são removidos em caso de erro; erros de I/O propagam-se com mensagem clara.
+Proteções: nada é escrito se a formatação falhar; ficheiros preparados numa subpasta privada `.bagflow-export-<id>` e renomeados; uma pasta com `bags.csv/events.csv/config.json` existentes nunca é substituída sem `AllowOverwrite`. Durante a sobrescrita, os originais ficam guardados até publicar os três ficheiros; em caso de erro, removem-se os novos ficheiros e restauram-se os anteriores. Se o próprio sistema de ficheiros impedir a recuperação, a exceção indica a pasta de recuperação, que é preservada. Isto recupera exceções de escrita/renomeação, não oferece uma transação contra interrupção do processo ou falha de energia. Erros de I/O propagam-se com mensagem clara.
 
 Diretório por defeito (adaptador Unity): `Application.persistentDataPath/BAGFLOW/exports`
 (Windows: `%USERPROFILE%\AppData\LocalLow\<Company>\<Product>\BAGFLOW\exports`; macOS: `~/Library/Application Support/<Company>/<Product>/BAGFLOW/exports`). Pode ser alterado no campo `Output Folder`.
@@ -62,6 +62,8 @@ A pasta de destino não pode já conter os conjuntos (apagar `validation/data/un
 Poisson: só se usam janelas fixas dentro de [0, 240 s). Com chegadas constantes a última mala chega aos 295 s, logo todas as execuções cobrem esse horizonte e cada janela tem a mesma exposição T (sem viés pela duração variável). O total de bloqueios por execução **não** é usado como Poisson(λT).
 
 ## Notebook
+
+Requer Matplotlib ≥ 3.9 (argumento `tick_labels` dos boxplots).
 
 ```sh
 pip install -r validation/requirements-optional.txt
