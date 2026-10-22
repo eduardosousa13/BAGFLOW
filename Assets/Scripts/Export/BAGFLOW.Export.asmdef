@@ -1,0 +1,6 @@
+{
+  "name": "BAGFLOW.Export",
+  "rootNamespace": "AirportBaggageSimulator",
+  "references": ["BAGFLOW.Contracts", "BAGFLOW.Probability", "BAGFLOW.Simulation"],
+  "noEngineReferences": true
+}

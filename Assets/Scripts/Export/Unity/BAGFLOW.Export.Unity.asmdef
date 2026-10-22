@@ -1,0 +1,5 @@
+{
+  "name": "BAGFLOW.Export.Unity",
+  "rootNamespace": "AirportBaggageSimulator",
+  "references": ["BAGFLOW.Contracts", "BAGFLOW.Integration", "BAGFLOW.Export"]
+}

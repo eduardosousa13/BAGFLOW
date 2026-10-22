@@ -1,4 +1,8 @@
-# Optional plotting/notebook dependencies for the future M5 validation notebook
+# M5 validation notebook and analysis tests (the reference tests in test_reference.py need only the standard library)
 numpy>=1.24
-matplotlib>=3.7
 scipy>=1.11
+pandas>=2.0
+matplotlib>=3.9
+nbformat>=5.9
+nbconvert>=7.0
+ipykernel>=6.0
