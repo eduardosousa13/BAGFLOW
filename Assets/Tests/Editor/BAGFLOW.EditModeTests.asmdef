@@ -1,0 +1,7 @@
+{
+  "name": "BAGFLOW.EditModeTests",
+  "rootNamespace": "AirportBaggageSimulator.Tests",
+  "references": ["BAGFLOW.Contracts", "BAGFLOW.Probability", "BAGFLOW.Integration"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}
