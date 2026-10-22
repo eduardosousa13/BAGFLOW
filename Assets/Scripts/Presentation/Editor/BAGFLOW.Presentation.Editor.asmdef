@@ -1,0 +1,6 @@
+{
+  "name": "BAGFLOW.Presentation.Editor",
+  "rootNamespace": "AirportBaggageSimulator",
+  "references": ["BAGFLOW.Contracts", "BAGFLOW.Presentation", "BAGFLOW.Composition", "BAGFLOW.Integration", "BAGFLOW.Simulation", "UnityEngine.UI"],
+  "includePlatforms": ["Editor"]
+}

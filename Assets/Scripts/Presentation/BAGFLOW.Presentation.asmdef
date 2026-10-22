@@ -1,0 +1,5 @@
+{
+  "name": "BAGFLOW.Presentation",
+  "rootNamespace": "AirportBaggageSimulator",
+  "references": ["BAGFLOW.Contracts", "BAGFLOW.Integration", "Unity.InputSystem", "UnityEngine.UI"]
+}
