@@ -370,6 +370,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1700000001}
   - component: {fileID: 1700000002}
+  - component: {fileID: 1700000003}
   m_Layer: 0
   m_Name: BAGFLOW Integration
   m_TagString: Untagged
@@ -409,6 +410,21 @@ MonoBehaviour:
   dashboardViewComponent: {fileID: 0}
   controlViewComponent: {fileID: 0}
   maxTicksPerFrame: 1000
+--- !u!114 &1700000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 475df3abdcb94f319c0eeddf670ccb8b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  worldViewComponent: {fileID: 0}
+  dashboardViewComponent: {fileID: 0}
+  controlViewComponent: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
