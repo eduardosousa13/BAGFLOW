@@ -361,11 +361,12 @@ namespace AirportBaggageSimulator
             {
                 int row = i / 2, column = i % 2;
                 float x0 = column == 0 ? 0.04f : 0.52f;
-                float top = 0.85f - row * 0.1f;
+                // Eight rows fit above the footer without covering its buttons.
+                float top = 0.85f - row * 0.09f;
                 var label = UiBuilder.Label(card.transform, "Label", labels[i], 15, UiTheme.TextDim);
-                UiBuilder.Anchor(label.rectTransform, x0, top - 0.04f, x0 + 0.44f, top);
+                UiBuilder.Anchor(label.rectTransform, x0, top - 0.034f, x0 + 0.44f, top);
                 inputs[i] = UiBuilder.MakeInput(card.transform, "Field", "");
-                UiBuilder.Anchor(inputs[i].GetComponent<Image>().rectTransform, x0, top - 0.092f, x0 + 0.44f, top - 0.042f);
+                UiBuilder.Anchor(inputs[i].GetComponent<Image>().rectTransform, x0, top - 0.084f, x0 + 0.44f, top - 0.038f);
             }
             fields.MeanArrival = inputs[0]; fields.TransportMin = inputs[1]; fields.TransportMode = inputs[2];
             fields.TransportMax = inputs[3]; fields.MeanInspection = inputs[4]; fields.WeightMean = inputs[5];

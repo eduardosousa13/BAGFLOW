@@ -67,3 +67,16 @@ Unity ▸ Test Runner ▸ EditMode ▸ `BAGFLOW.PresentationTests` (inclui teste
 * A fila desenha 6 posições e as saídas 8 por faixa; o excedente é indicado em texto/contadores.
 * Texto com a fonte integrada do Unity (sem TextMeshPro, para não depender de recursos importados).
 * Sem exportador (M5) nem alterações a `MainSimulation.unity`; a montagem nessa cena é feita pelo M1.
+
+
+## Correções após revisão independente
+
+- Reiniciar repõe também a seleção visual da velocidade original da execução, de acordo com o reset do controlador. A UI guarda essa velocidade apenas quando `SetRunning(true)` confirma um `StartRequested` aceite; um arranque rejeitado não altera o valor guardado. Um novo arranque aceite passa a definir a nova velocidade original. Não se emite um pedido de mudança de velocidade durante o reset.
+- As oito linhas dos parâmetros avançados foram compactadas para deixar espaço para os botões inferiores. O prefab `BAGFLOW_UI` foi atualizado apenas nas âncoras dos campos/etiquetas, preservando os restantes objetos e referências. `VisualSandbox` herda o layout do prefab, sem alterações à cena principal.
+- Regressões acrescentadas: quatro pares de velocidades com controlador/motor reais; arranque rejeitado; novo arranque aceite; e um teste em Play Mode com raycasts no centro de cada um dos 15 campos avançados, tanto na factory como no prefab guardado.
+
+Revalidação das correções no Unity **6000.6.7f1**, macOS, numa cópia isolada: **133/133 testes passaram**, zero falhas/ignorados, exit code 0 (126 existentes + 7 casos de regressão). A compilação foi verificada no Editor. O teste de layout entrou em Play Mode e confirmou o raycast nos 15 campos, na factory e no prefab efetivamente guardado. O reset foi testado a partir de 1×/5×/10×/20×, incluindo um arranque rejeitado e um novo arranque aceite.
+
+Comando: `Unity -batchmode -nographics -projectPath /tmp/bagflow-pr4-review -runTests -testPlatform EditMode -testResults /tmp/bagflow-pr4-fixed-results.xml -logFile /tmp/bagflow-pr4-fixed-unity.log`.
+
+Logs/XML locais: `/tmp/bagflow-pr4-fixed-unity.log` e `/tmp/bagflow-pr4-fixed-results.xml` (não versionados). O prefab mantém todo o conteúdo anterior, com apenas 58 alterações de âncoras. Contratos, controlador, motor, geradores, cena principal e configuração Unity permaneceram inalterados. A execução em batch não substitui a inspeção gráfica manual em projetor.

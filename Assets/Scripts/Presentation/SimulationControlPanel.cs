@@ -46,6 +46,8 @@ namespace AirportBaggageSimulator
         private bool complete;
         private ArrivalMode arrivalMode = ArrivalMode.Constant;
         private double speed = 10;
+        private double initialRunSpeed = 10;
+        private double? pendingStartSpeed;
 
         public event Action<SimulationConfig> StartRequested;
         public event Action PauseRequested;
@@ -129,6 +131,9 @@ namespace AirportBaggageSimulator
         public void SetRunning(bool isRunning)
         {
             running = isRunning;
+            // SetRunning(true) during StartRequested acknowledges an accepted start.
+            // Rejected form/domain values must not overwrite the run restored by Reset.
+            if (isRunning && pendingStartSpeed.HasValue) initialRunSpeed = pendingStartSpeed.Value;
             if (isRunning) started = true;
             Refresh();
         }
@@ -166,7 +171,10 @@ namespace AirportBaggageSimulator
             string error;
             if (!TryReadConfig(out config, out error)) { ShowValidationError(error); return; }
             var handler = StartRequested;
-            if (handler != null) handler(config);
+            if (handler == null) return;
+            pendingStartSpeed = config.PlaybackSpeed;
+            try { handler(config); }
+            finally { pendingStartSpeed = null; }
         }
 
         public void ClickPauseResume()
@@ -181,7 +189,13 @@ namespace AirportBaggageSimulator
             ShowValidationError(null);
             ShowExportResult(true, null);
             var handler = ResetRequested;
-            if (handler != null) handler();
+            if (handler != null)
+            {
+                handler();
+                // The controller restores the original config, including playback speed.
+                // Mirror it without emitting a speed change that would override the reset.
+                if (started) { speed = initialRunSpeed; Refresh(); }
+            }
         }
 
         public void ClickExport()

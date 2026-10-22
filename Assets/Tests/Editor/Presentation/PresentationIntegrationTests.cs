@@ -18,6 +18,104 @@ namespace AirportBaggageSimulator.Tests
             foreach (var es in Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None)) Object.DestroyImmediate(es.gameObject);
         }
 
+        [TestCase(1, 20)] [TestCase(5, 1)] [TestCase(10, 20)] [TestCase(20, 5)]
+        public void ResetRestoresTheAcceptedSpeedInBothUiAndRealEngine(double initial, double changed)
+        {
+            var ui = BagflowUiFactory.Build();
+            var host = new GameObject("Speed reset integration");
+            var composition = host.AddComponent<SimulationComposition>();
+            var controller = host.GetComponent<SimulationController>();
+            try
+            {
+                composition.Compose(ui.World, ui.Dashboard, ui.Controls);
+                ui.Controls.Fields.StepSeconds.text = "1";
+                ui.Controls.SelectSpeed(initial); ui.Controls.ClickStart();
+                Assert.IsTrue(ui.Controls.IsRunning);
+                ui.Controls.SelectSpeed(changed); ui.Controls.ClickReset();
+                Assert.IsFalse(ui.Controls.IsRunning);
+                Assert.AreEqual(initial, ui.Controls.SelectedSpeed);
+                Assert.AreEqual(UiTheme.Accent, ui.transform.Find("Controls/Speed" + initial).GetComponent<Image>().color);
+                ui.Controls.ClickPauseResume(); controller.Advance(1);
+                Assert.AreEqual(initial, composition.Engine.GetSnapshot().SimulationTimeSeconds);
+            }
+            finally { Cleanup(host, ui.gameObject); }
+        }
+
+        [Test] public void RejectedStartDoesNotReplaceTheSpeedRestoredByReset()
+        {
+            var ui = BagflowUiFactory.Build(); var host = new GameObject("Rejected start speed");
+            var composition = host.AddComponent<SimulationComposition>();
+            var controller = host.GetComponent<SimulationController>();
+            try
+            {
+                composition.Compose(ui.World, ui.Dashboard, ui.Controls);
+                ui.Controls.Fields.StepSeconds.text = "1";
+                ui.Controls.SelectSpeed(1); ui.Controls.ClickStart(); ui.Controls.ClickPauseResume();
+                ui.Controls.SelectSpeed(20); ui.Controls.Fields.FlagProbability.text = "3";
+                ui.Controls.ClickStart();
+                StringAssert.Contains("FlagProbability", ui.Controls.ErrorText);
+                ui.Controls.ClickReset();
+                Assert.AreEqual(1, ui.Controls.SelectedSpeed);
+                ui.Controls.ClickPauseResume(); controller.Advance(1);
+                Assert.AreEqual(1, composition.Engine.GetSnapshot().SimulationTimeSeconds);
+            }
+            finally { Cleanup(host, ui.gameObject); }
+        }
+
+        [Test] public void ANewAcceptedStartReplacesTheOriginalResetSpeed()
+        {
+            var ui = BagflowUiFactory.Build(); var host = new GameObject("New start speed");
+            var composition = host.AddComponent<SimulationComposition>();
+            var controller = host.GetComponent<SimulationController>();
+            try
+            {
+                composition.Compose(ui.World, ui.Dashboard, ui.Controls);
+                ui.Controls.Fields.StepSeconds.text = "1";
+                ui.Controls.SelectSpeed(1); ui.Controls.ClickStart(); ui.Controls.ClickPauseResume();
+                ui.Controls.SelectSpeed(20); ui.Controls.ClickStart();
+                Assert.IsTrue(ui.Controls.IsRunning);
+                ui.Controls.SelectSpeed(5); ui.Controls.ClickReset();
+                Assert.AreEqual(20, ui.Controls.SelectedSpeed);
+                ui.Controls.ClickPauseResume(); controller.Advance(1);
+                Assert.AreEqual(20, composition.Engine.GetSnapshot().SimulationTimeSeconds);
+            }
+            finally { Cleanup(host, ui.gameObject); }
+        }
+
+        [UnityTest] public IEnumerator EveryAdvancedInputReceivesThePointerInFactoryAndSavedPrefab()
+        {
+            yield return new EnterPlayMode();
+            foreach (bool savedPrefab in new[] { false, true })
+            {
+                var ui = savedPrefab
+                    ? ((GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BAGFLOW_UI.prefab"))).GetComponent<BagflowUi>()
+                    : BagflowUiFactory.Build();
+                try
+                {
+                    ui.Controls.ToggleAdvanced();
+                    yield return null;
+                    Canvas.ForceUpdateCanvases();
+                    var raycaster = ui.GetComponent<GraphicRaycaster>();
+                    var fields = ui.transform.Find("AdvancedPanel/Card").GetComponentsInChildren<InputField>();
+                    Assert.AreEqual(15, fields.Length);
+                    foreach (var field in fields)
+                    {
+                        var rect = field.GetComponent<RectTransform>();
+                        Assert.Greater(rect.rect.width, 0); Assert.Greater(rect.rect.height, 0);
+                        var position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
+                        var pointer = new PointerEventData(EventSystem.current) { position = position };
+                        var hits = new System.Collections.Generic.List<RaycastResult>();
+                        raycaster.Raycast(pointer, hits);
+                        Assert.Greater(hits.Count, 0, "No hit for " + field.name);
+                        Assert.AreSame(field.gameObject, hits[0].gameObject,
+                            (savedPrefab ? "Saved prefab" : "Factory") + ": another control covers an advanced input.");
+                    }
+                }
+                finally { Cleanup(ui.gameObject); }
+            }
+            yield return new ExitPlayMode();
+        }
+
         [UnityTest] public IEnumerator EnableDisableCyclesDoNotDuplicateSubscriptions()
         {
             yield return new EnterPlayMode();
