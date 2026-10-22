@@ -68,12 +68,19 @@ namespace AirportBaggageSimulator
                 accumulatedSeconds += realSeconds * PlaybackSpeed;
                 if (double.IsInfinity(accumulatedSeconds)) throw new InvalidOperationException("Playback time accumulator overflow.");
                 int frameTicks = 0;
+                SimulationSnapshot previous = null;
                 while (accumulatedSeconds >= original.SimulationStepSeconds && frameTicks < maxTicksPerFrame && !engine.IsComplete)
                 {
                     if (ticks >= maxTicks) throw new InvalidOperationException("Maximum simulated duration/tick budget reached without completion.");
-                    double before = Snapshot.SimulationTimeSeconds;
+                    // One initial copy per Advance with ticks, then reuse each result as
+                    // the baseline for the next tick. No snapshot allocation on idle frames.
+                    if (previous == null) previous = engine.GetSnapshot();
+                    double before = previous.SimulationTimeSeconds;
+                    if (double.IsNaN(before) || double.IsInfinity(before))
+                        throw new InvalidOperationException("Engine clock must be finite before stepping.");
                     engine.Step();
-                    double after = Snapshot.SimulationTimeSeconds;
+                    previous = engine.GetSnapshot();
+                    double after = previous.SimulationTimeSeconds;
                     if (double.IsNaN(after) || double.IsInfinity(after) || after <= before)
                         throw new InvalidOperationException("Engine clock did not advance to a finite increasing time.");
                     accumulatedSeconds -= original.SimulationStepSeconds;

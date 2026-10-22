@@ -18,6 +18,7 @@ namespace AirportBaggageSimulator
         private ISimulationControlView controls;
         private SimulationSession session;
         private bool subscribed;
+        private bool hasBinding;
         private Action<SimulationConfig, IReadOnlyList<BagRecord>, IReadOnlyList<SimulationEventRecord>> exporter;
 
         // Local composition hooks, not replacements for the shared engine/view contracts.
@@ -26,6 +27,9 @@ namespace AirportBaggageSimulator
 
         private void Awake()
         {
+            // Explicit composition on an inactive object may precede Awake.
+            // Never overwrite that binding with the serialized Inspector defaults.
+            if (hasBinding) return;
             try
             {
                 Bind(engineComponent == null ? null : RequireInterface<ISimulationEngine>(engineComponent),
@@ -36,11 +40,16 @@ namespace AirportBaggageSimulator
             catch (Exception error) { Report(error); }
         }
 
+        /// <summary>Explicit binding takes precedence over Inspector defaults, even before Awake.
+        /// Compose in the root's Start (after view Awake/OnEnable), or bind while inactive
+        /// and then activate. Views must wait for composition before sending commands.</summary>
         public void Bind(ISimulationEngine simulationEngine, ISimulationWorldView worldView,
             ISimulationDashboardView dashboardView, ISimulationControlView controlView)
         {
+            hasBinding = true;
             Unsubscribe();
             if (session != null) session.Pause();
+            controls?.SetRunning(false);
             engine = simulationEngine;
             world = worldView;
             dashboard = dashboardView;
