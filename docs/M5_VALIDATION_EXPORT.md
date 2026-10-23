@@ -1,5 +1,7 @@
 # M5 — exportação, validação estatística e fontes
 
+**Integração final:** a cena principal já contém o prefab UI, as três referências da composição e o adaptador M5. Ver [montagem final e roteiro de demonstração](FINAL_SCENE_INTEGRATION.md). O relato original do módulo abaixo mantém a sua rastreabilidade.
+
 Branch `feature/validation-export`. Não altera contratos, geradores M2, motor M3, `SimulationController`, cena principal nem componentes M4.
 
 ## Ficheiros
@@ -80,7 +82,7 @@ Contém: proveniência e integridade; para Triangular (transporte **nominal**), 
 
 ## Limitações e dependências restantes
 
-* M1 tem de adicionar o adaptador à `MainSimulation.unity` (passos acima).
+* O adaptador já está ligado à `MainSimulation.unity`; o procedimento acima permite repetir a montagem.
 * Amostras de uma execução vêm do mesmo stream; seeds consecutivas entre execuções. Testes de ajustamento são indicativos (sem correção para comparações múltiplas).
 * Tempos operacionais quantizados a Δt = 0,1 s; o tempo bloqueado exportado em `runs.csv` é a contabilização por tick do motor.
 * Parâmetros didáticos (ver `docs/DATA_SOURCES.md`); as fontes só contextualizam ordens de grandeza.

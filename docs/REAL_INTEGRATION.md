@@ -1,5 +1,7 @@
 # Integração real M1 + M3
 
+**Integração final:** a cena principal já contém o prefab UI, as três referências da composição e o adaptador M5. Ver [montagem final e roteiro de demonstração](FINAL_SCENE_INTEGRATION.md). O relato original do módulo abaixo mantém a sua rastreabilidade.
+
 Base: `origin/main` após integrar os PRs #1 e #2. Contratos aprovados e código de Probability/Simulation preservados.
 
 ## Composição e cena
