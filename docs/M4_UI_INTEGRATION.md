@@ -1,5 +1,7 @@
 # M4 — Interface e visualização Unity 2D (montagem e integração)
 
+**Integração final:** a cena principal já contém o prefab UI, as três referências da composição e o adaptador M5. Ver [montagem final e roteiro de demonstração](FINAL_SCENE_INTEGRATION.md). O relato original do módulo abaixo mantém a sua rastreabilidade.
+
 Branch `feature/visual-ui`. Implementa `ISimulationWorldView`, `ISimulationDashboardView` e `ISimulationControlView` sem alterar contratos, motor, geradores, `SimulationController`/`SimulationComposition`, exportador ou `MainSimulation.unity`.
 
 ## Ficheiros
