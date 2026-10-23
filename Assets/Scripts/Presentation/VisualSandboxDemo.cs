@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -31,6 +32,9 @@ namespace AirportBaggageSimulator
         private void Update()
         {
 #if ENABLE_INPUT_SYSTEM
+            // Let the selected UI control own keyboard input (text, navigation, sliders, etc.).
+            var selected = EventSystem.current == null ? null : EventSystem.current.currentSelectedGameObject;
+            if (selected != null && selected.GetComponentInParent<Selectable>() != null) return;
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
             if (keyboard.rightArrowKey.wasPressedThisFrame) Show(scenario + 1);
